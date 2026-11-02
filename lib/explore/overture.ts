@@ -4,7 +4,7 @@
 // direction — what landmarks like the Eiffel Tower need — and unlike public
 // Overpass it has no queue and needs no key.
 
-import { PMTiles } from "pmtiles";
+import { EtagMismatch, PMTiles, type RangeResponse, type Source } from "pmtiles";
 import { VectorTile, classifyRings, type VectorTileFeature } from "@mapbox/vector-tile";
 import Pbf from "pbf";
 import { union, type Pair, type Polygon } from "polygon-clipping";
@@ -14,6 +14,46 @@ import { buildingHeight, buildingRoof, clipArea, groundFloating, outlineBase, ty
 const STAC = "https://stac.overturemaps.org";
 const Z = 14; // the archive's max zoom — every building is present here
 const MAX_TILES = 16;
+
+/**
+ * Range reader for the archive that sends no Referer. Overture's CDN rejects
+ * requests referred from some hosting domains (every *.vercel.app page gets a
+ * 403), which silently dropped prod back to roofless tile buildings. The
+ * pmtiles FetchSource has no way to turn the header off.
+ */
+class NoReferrerSource implements Source {
+  constructor(private url: string) {}
+
+  getKey() {
+    return this.url;
+  }
+
+  async getBytes(offset: number, length: number, signal?: AbortSignal, etag?: string): Promise<RangeResponse> {
+    const res = await fetch(this.url, {
+      signal,
+      referrerPolicy: "no-referrer",
+      headers: { Range: `bytes=${offset}-${offset + length - 1}` },
+    });
+    let newEtag = res.headers.get("ETag") ?? undefined;
+    if (newEtag?.startsWith("W/")) newEtag = undefined;
+    if (res.status === 416 || (etag && newEtag && newEtag !== etag)) {
+      throw new EtagMismatch(`Overture archive changed (${res.status})`);
+    }
+    if (res.status >= 300) throw new Error(`Overture tiles ${res.status}`);
+    // A server ignoring Range would send the whole 180 GB archive — stop it.
+    const size = Number(res.headers.get("Content-Length"));
+    if (res.status === 200 && (!size || size > length)) {
+      res.body?.cancel();
+      throw new Error("Overture tiles: server ignored the byte range");
+    }
+    return {
+      data: await res.arrayBuffer(),
+      etag: newEtag,
+      cacheControl: res.headers.get("Cache-Control") ?? undefined,
+      expires: res.headers.get("Expires") ?? undefined,
+    };
+  }
+}
 
 let archivePromise: Promise<PMTiles> | null = null;
 
@@ -26,7 +66,7 @@ function buildingsArchive(): Promise<PMTiles> {
     };
     const href = cat.links.find((l) => l.rel === "pmtiles")?.href;
     if (!href) throw new Error("Overture release has no buildings PMTiles");
-    return new PMTiles(href);
+    return new PMTiles(new NoReferrerSource(href));
   })().catch((err) => {
     archivePromise = null;
     throw err;
