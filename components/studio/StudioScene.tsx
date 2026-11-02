@@ -20,6 +20,16 @@ import { MM, DEFAULT_LAYER_COLORS, type CityControls } from "@/lib/studio";
 import type { ModelFile } from "@/app/studio/actions";
 
 export type GizmoMode = "translate" | "rotate" | "scale";
+// null hides the gizmo: size and placement are then set from the side panel.
+
+/** A printable frame shown around the model: geometry in mm, Z up, back at z = 0. */
+export type SceneFrame = {
+  geometry: THREE.BufferGeometry;
+  color: string;
+  position: [number, number, number];
+  /** Nameplate letters, a separate part in their own colour. */
+  text?: { geometry: THREE.BufferGeometry; color: string } | null;
+};
 
 function Bed({ w, d, light }: { w: number; d: number; light: boolean }) {
   // Grid every 20 mm, plus a brighter outer border.
@@ -83,7 +93,7 @@ function TransformTarget({
   onTransform,
   children,
 }: {
-  mode: GizmoMode;
+  mode: GizmoMode | null;
   position: [number, number, number];
   onTarget: (o: THREE.Object3D | null) => void;
   onTransform: (o: THREE.Object3D) => void;
@@ -107,7 +117,7 @@ function TransformTarget({
       <group ref={group} position={position}>
         {children}
       </group>
-      {obj && (
+      {obj && mode && (
         <TransformControls
           object={obj}
           mode={mode}
@@ -166,7 +176,7 @@ function CityAssembly({
   onTransform,
 }: {
   files: ModelFile[];
-  mode: GizmoMode;
+  mode: GizmoMode | null;
   controls: CityControls;
   onTarget: (o: THREE.Object3D | null) => void;
   onTransform: (o: THREE.Object3D) => void;
@@ -280,7 +290,7 @@ function CityAssembly({
     // Which axis is "up"? Flat layers (roads/terrain/grass) are thinnest
     // along it — robust whether the exports are Y-up or Z-up.
     let upAxis: Axis = "y";
-    const flat = ["roads", "terrain", "grass", "water"]
+    const flat = ["terrain", "roads", "grass", "water"]
       .map((n) => object.getObjectByName(n))
       .find(Boolean);
     if (flat) {
@@ -419,10 +429,40 @@ function CityAssembly({
 
     // Non-terrain components stay right at rest positions on the terrain surface.
     const COMPONENT_INSERTION = 0;
+    // Generated (Explore World) layers carry a per-vertex `_anchor`: every
+    // building / tree / road / water patch scales about its own ground point,
+    // so resized objects stay on the terrain instead of the layer stretching
+    // from its lowest point (which lifts everything standing on a hill).
+    const scaleAnchored = (layer: THREE.Object3D, vert: number, all: number) => {
+      const anchored: THREE.Mesh[] = [];
+      layer.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.isMesh && m.geometry?.attributes._anchor && m.userData.origPosition) anchored.push(m);
+      });
+      if (!anchored.length) return false;
+      layer.scale.set(1, 1, 1);
+      layer.position.set(0, 0, 0);
+      const s = AXES.map((a) => (a === upAxis ? vert : 1) * all);
+      for (const m of anchored) {
+        const posAttr = m.geometry.attributes.position as THREE.BufferAttribute;
+        const out = posAttr.array as Float32Array;
+        const orig = m.userData.origPosition as Float32Array;
+        const anc = (m.geometry.attributes._anchor as THREE.BufferAttribute).array as Float32Array;
+        for (let i = 0; i < out.length; i++) out[i] = anc[i] + (orig[i] - anc[i]) * s[i % 3];
+        posAttr.needsUpdate = true;
+        m.geometry.computeBoundingBox();
+        m.geometry.computeBoundingSphere();
+      }
+      return true;
+    };
+
     const apply = (name: string, vert: number, all: number) => {
       const layer = object.getObjectByName(name);
       const info = layerInfo.get(name);
       if (!layer || !info || name === "terrain" || name === "water") return;
+
+      if (scaleAnchored(layer, vert, all)) return;
+
       AXES.forEach((a) => {
         const s = (a === upAxis ? vert : 1) * all;
         const anchor = a === upAxis ? info.min[a] : info.center[a];
@@ -472,15 +512,26 @@ function CityAssembly({
           const invMat = localMat.clone().invert();
           const v = new THREE.Vector3();
 
+          // Generated terrain has hills reaching into the lower 35%: a ramp
+          // would sink valleys away from the roads, trees and buildings on
+          // them. Its bottom is one flat plane, so move only that plane.
+          const flatBase = !!m.userData.flatBase;
+          const baseEps = totalH * 1e-3;
+
           for (let i = 0; i < orig.length; i += 3) {
             v.set(orig[i], orig[i + 1], orig[i + 2]);
             v.applyMatrix4(localMat);
 
             const yLocal = v[upAxis];
-            const t = THREE.MathUtils.clamp((yLocal - minY) / (topThreshold - minY), 0, 1);
-            // Bottom vertices (t=0) get the full terrain extension.
-            // Top vertices (t=1) stay fixed — no delta.
-            const delta = (1 - t) * terrainOffset;
+            let delta: number;
+            if (flatBase) {
+              delta = yLocal <= minY + baseEps ? terrainOffset : 0;
+            } else {
+              const t = THREE.MathUtils.clamp((yLocal - minY) / (topThreshold - minY), 0, 1);
+              // Bottom vertices (t=0) get the full terrain extension.
+              // Top vertices (t=1) stay fixed — no delta.
+              delta = (1 - t) * terrainOffset;
+            }
             v[upAxis] = yLocal - delta;
 
             v.applyMatrix4(invMat);
@@ -499,7 +550,9 @@ function CityAssembly({
     // without increasing the water's vertical size.
     const waterLayer = object.getObjectByName("water");
     const waterInfo = layerInfo.get("water");
-    if (waterLayer && waterInfo) {
+    // Generated water lies on the ground (rivers run down slopes): it grows in
+    // place from the ground under each point and never moves with the base.
+    if (waterLayer && waterInfo && !scaleAnchored(waterLayer, controls.water / 100, 1)) {
       const sWater = controls.water / 100;
       AXES.forEach((a) => {
         const s = a === upAxis ? sWater : 1;
@@ -814,7 +867,7 @@ function PlaceholderTile({
   onTarget,
   onTransform,
 }: {
-  mode: GizmoMode;
+  mode: GizmoMode | null;
   onTarget: (o: THREE.Object3D | null) => void;
   onTransform: (o: THREE.Object3D) => void;
 }) {
@@ -871,10 +924,12 @@ export default function StudioScene({
   cityControls,
   onTarget,
   onTransform,
+  frame,
 }: {
+  frame?: SceneFrame | null;
   bedW: number;
   bedD: number;
-  mode: GizmoMode;
+  mode: GizmoMode | null;
   light: boolean;
   loading: boolean;
   files: ModelFile[];
@@ -901,6 +956,20 @@ export default function StudioScene({
       <directionalLight position={[0, 2, -8]} intensity={0.45} color="#e8d9c4" />
 
       <Bed w={bedW} d={bedD} light={light} />
+
+      {frame && (
+        // Z-up millimetres → Y-up scene units; the top rail ends up at the back.
+        <group position={frame.position} rotation={[-Math.PI / 2, 0, 0]} scale={MM}>
+          <mesh geometry={frame.geometry} castShadow receiveShadow>
+            <meshStandardMaterial color={frame.color} roughness={0.55} metalness={0.05} />
+          </mesh>
+          {frame.text && (
+            <mesh geometry={frame.text.geometry} castShadow>
+              <meshStandardMaterial color={frame.text.color} roughness={0.5} metalness={0.05} />
+            </mesh>
+          )}
+        </group>
+      )}
 
       {/* One render path — no placeholder→model swap. */}
       {loading ? (
