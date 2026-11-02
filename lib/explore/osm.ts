@@ -474,6 +474,8 @@ export async function fetchMapData(shape: FrameShape, signal?: AbortSignal): Pro
   if (buildings && (buildings.length || !data.buildings.length)) {
     data.buildings = buildings;
     data.detailed = true;
+  } else if (buildings) {
+    console.warn("[explore] Overture returned no buildings here, using tile buildings");
   }
   // Government LOD2 models win where they have a building; OSM fills the gaps
   // (buildings newer than the survey, or areas the model doesn't cover).
