@@ -216,38 +216,50 @@ export function StudioPicker({
 
       {/* ✦ Explore World — build a tile from any place on the map */}
       {!viewingPatronFolders && (
-        <button
-          type="button"
-          onClick={() => router.push("/studio/explore")}
-          className="group mb-8 flex w-full items-center justify-between gap-4 rounded-2xl border border-cream/[0.16] bg-cream/[0.03] px-6 py-4 text-left transition-colors duration-300 hover:border-[var(--accent)]/60 hover:bg-[var(--accent)]/[0.06] cursor-pointer"
+  <button
+    type="button"
+    onClick={() => router.push("/studio/explore")}
+    className="group mb-8 flex w-full items-center justify-between gap-4 rounded-2xl border border-cream/[0.16] bg-cream/[0.03] px-6 py-4 text-left transition-colors duration-300 hover:border-[var(--accent)]/60 hover:bg-[var(--accent)]/[0.06] cursor-pointer"
+  >
+    <div className="flex items-center gap-3.5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cream/20 text-[var(--accent)] transition-colors group-hover:border-[var(--accent)]">
+        <Globe2 size={17} />
+      </span>
+      <div>
+        <div
+          className="mb-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.3em]"
+          style={{ color: "var(--accent)" }}
         >
-          <div className="flex items-center gap-3.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cream/20 text-[var(--accent)] transition-colors group-hover:border-[var(--accent)]">
-              <Globe2 size={17} />
-            </span>
-            <div>
-              <div
-                className="mb-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.3em]"
-                style={{ color: "var(--accent)" }}
-              >
-                New · Any place on Earth
-              </div>
-              <div className="font-display text-[18px] font-medium leading-tight text-cream">
-                Explore World
-              </div>
-              <div className="mt-0.5 font-mono text-[11px] text-cream/50">
-                Search the satellite map, frame an area and turn it into a printable 3D tile
-              </div>
-            </div>
-          </div>
-          <span
-            className="shrink-0 font-mono text-[13px] transition-transform duration-300 group-hover:translate-x-1"
-            style={{ color: "var(--accent)" }}
-          >
-            →
+          New · Any place on Earth
+        </div>
+        <div className="flex items-center gap-2.5">
+          <span className="font-display text-[18px] font-medium leading-tight text-cream">
+            Explore World
           </span>
-        </button>
-      )}
+          <span
+            className="rounded-full border px-2 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.25em]"
+            style={{
+              color: "var(--accent)",
+              borderColor: "var(--accent)",
+              background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+            }}
+          >
+            Beta
+          </span>
+        </div>
+        <div className="mt-0.5 font-mono text-[11px] text-cream/50">
+          Search the satellite map, frame an area and turn it into a printable 3D tile
+        </div>
+      </div>
+    </div>
+    <span
+      className="shrink-0 font-mono text-[13px] transition-transform duration-300 group-hover:translate-x-1"
+      style={{ color: "var(--accent)" }}
+    >
+      →
+    </span>
+  </button>
+)}
 
       {/* View Only Mode Top Banner */}
       {/* {!hasAccess && (
