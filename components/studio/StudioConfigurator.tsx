@@ -716,7 +716,7 @@ export function StudioConfigurator({
             </button>
           ) : (
             <Link
-              href="/studio"
+              href={type === "patron" ? "/studio" : "/studio/models"}
               className="flex shrink-0 items-center gap-2 rounded-full border border-cream/[0.16] px-4 py-2 text-[12.5px] text-cream/70 no-underline transition-colors hover:border-cream/40 hover:text-cream"
             >
               <span aria-hidden>←</span>
