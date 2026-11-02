@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { inferColorFromName } from "@/lib/studio";
 import type { StudioCity, StudioBuilding } from "@/lib/studio";
@@ -659,6 +660,15 @@ export async function checkPatronAccess(): Promise<{
   isPatron: boolean;
   username: string;
 }> {
+  return checkPatronAccessCached();
+}
+
+// Lists the R2 patron bucket, so run it at most once per request — the studio
+// pages and getPatronSubfolders/getPatronModelFiles all ask for it.
+const checkPatronAccessCached = cache(async (): Promise<{
+  isPatron: boolean;
+  username: string;
+}> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -721,7 +731,7 @@ export async function checkPatronAccess(): Promise<{
     console.error("[checkPatronAccess] Error checking patron bucket:", err);
     return { isPatron: false, username: candidates[0] || emailPrefix };
   }
-}
+});
 
 /**
  * List all subfolders inside a patron user's folder.

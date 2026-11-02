@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Logo } from "@/components/Logo";
 import { SignOutButton } from "@/components/SignOutButton";
-import { StudioPicker } from "@/components/studio/StudioPicker";
+import { StudioHome } from "@/components/studio/StudioHome";
 
-import { fetchStudioCities, fetchStudioBuildings, checkPatronAccess, getPatronSubfolders } from "@/app/studio/actions";
+import { checkPatronAccess, getPatronSubfolders } from "@/app/studio/actions";
 
 export const metadata = {
   title: "The Studio - FrameCity",
@@ -19,17 +19,14 @@ export default async function StudioPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/studio");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("has_access")
-    .eq("id", user.id)
-    .single();
+  // Independent lookups — run them together rather than one after another.
+  const [{ data: profile }, { isPatron, username: patronUsername }] = await Promise.all([
+    supabase.from("profiles").select("has_access").eq("id", user.id).single(),
+    checkPatronAccess(),
+  ]);
 
   const email = user.email ?? "your account";
   const hasAccess = Boolean(profile?.has_access);
-  const cities = await fetchStudioCities();
-  const buildings = await fetchStudioBuildings();
-  const { isPatron, username: patronUsername } = await checkPatronAccess();
   const patronFolders = isPatron && patronUsername ? await getPatronSubfolders(patronUsername) : [];
 
   return (
@@ -47,14 +44,11 @@ export default async function StudioPage() {
       </header>
 
       <main className="flex flex-1 flex-col">
-        <StudioPicker
-          initialCities={cities}
-          initialBuildings={buildings}
+        <StudioHome
           hasAccess={hasAccess}
           email={email}
           isPatron={isPatron}
-          patronUsername={patronUsername}
-          initialPatronFolders={patronFolders}
+          patronFolders={patronFolders}
         />
       </main>
     </div>

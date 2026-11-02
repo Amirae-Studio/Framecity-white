@@ -22,11 +22,7 @@ import { buildExploreModel, PRINT_MM, summarize, TREE_PRINT_MM, type ExploreLaye
 
 const MapPicker = dynamic(() => import("./MapPicker").then((m) => m.MapPicker), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-cream/20 border-t-[color:var(--accent)]" />
-    </div>
-  ),
+  loading: () => <div className="h-full animate-pulse bg-cream/[0.04]" />,
 });
 
 type Phase = "map" | "scanning" | "customize" | "building" | "studio";

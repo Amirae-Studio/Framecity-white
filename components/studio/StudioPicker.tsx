@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { StudioCity, StudioBuilding } from "@/lib/studio";
 import { fetchStudioCities, fetchStudioBuildings, getPatronSubfolders } from "@/app/studio/actions";
 import { SpotlightCard } from "../ui/SpotlightCard";
-import { ShinyText } from "../ui/ShinyText"; // Kept for your other potential uses
 import { StepTimeline } from "../ui/StepLine";
-import { ConnectStudioModal } from "@/components/ConnectStudioModal";
-import { Folder, Globe2 } from "lucide-react";
+import { Folder } from "lucide-react";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -18,19 +17,17 @@ export type CategoryType = "cities" | "buildings";
 export function StudioPicker({
   initialCities,
   initialBuildings,
-  hasAccess = false,
-  email = "",
   isPatron = false,
   patronUsername = "",
   initialPatronFolders = [],
+  initialView = "handmade",
 }: {
   initialCities?: StudioCity[];
   initialBuildings?: StudioBuilding[];
-  hasAccess?: boolean;
-  email?: string;
   isPatron?: boolean;
   patronUsername?: string;
   initialPatronFolders?: string[];
+  initialView?: "handmade" | "custom";
 }) {
   const router = useRouter();
   const [cities, setCities] = useState<StudioCity[]>(initialCities || []);
@@ -38,10 +35,7 @@ export function StudioPicker({
     initialBuildings || []
   );
   const [patronFolders, setPatronFolders] = useState<string[]>(initialPatronFolders);
-  const [viewingPatronFolders, setViewingPatronFolders] = useState(false);
-
-  // Auto-open connect access modal if user has not unlocked studio access yet
-  const [connectModalOpen, setConnectModalOpen] = useState(!hasAccess);
+  const viewingPatronFolders = initialView === "custom";
 
   const [category, setCategory] = useState<CategoryType | null>("cities");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -139,134 +133,6 @@ export function StudioPicker({
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Connect Studio Modal */}
-      <ConnectStudioModal
-        isOpen={connectModalOpen}
-        onClose={() => setConnectModalOpen(false)}
-        email={email}
-      />
-
-      {/* ✦ Custom Model — Patron-only glowing button */}
-      {isPatron && !viewingPatronFolders && (
-        <button
-          type="button"
-          onClick={() => {
-            if (patronFolders.length > 1) {
-              setViewingPatronFolders(true);
-            } else if (patronFolders.length === 1) {
-              router.push(`/studio/configure?type=patron&location=${encodeURIComponent(patronFolders[0])}`);
-            } else {
-              router.push("/studio/configure?type=patron");
-            }
-          }}
-          className="patron-custom-btn group mb-8 flex w-full items-center justify-between gap-4 rounded-2xl border px-6 py-4 cursor-pointer text-left"
-          style={{
-            borderColor: "rgba(var(--accent-rgb, 139,92,246), 0.45)",
-            background:
-              "linear-gradient(135deg, rgba(var(--accent-rgb, 139,92,246),0.12) 0%, rgba(var(--accent-rgb, 139,92,246),0.04) 100%)",
-            backdropFilter: "blur(10px)",
-            boxShadow:
-              "0 0 0 1px rgba(var(--accent-rgb,139,92,246),0.15), 0 0 28px rgba(var(--accent-rgb,139,92,246),0.18), inset 0 1px 0 rgba(255,255,255,0.06)",
-          }}
-        >
-          <div className="flex items-center gap-3.5">
-            {/* Pulsing orb */}
-            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
-              <span
-                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-30"
-                style={{ background: "var(--accent)" }}
-              />
-              <span
-                className="relative inline-flex h-7 w-7 items-center justify-center rounded-full"
-                style={{ background: "var(--accent)" }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"
-                    fill="white"
-                  />
-                </svg>
-              </span>
-            </span>
-            <div>
-              <div
-                className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] mb-0.5"
-                style={{ color: "var(--accent)" }}
-              >
-                Patron exclusive
-              </div>
-              <div className="font-display text-[18px] font-medium text-cream leading-tight">
-                Custom Model
-              </div>
-              <div className="font-mono text-[11px] text-cream/50 mt-0.5">
-                {patronFolders.length > 1
-                  ? `${patronFolders.length} models available — click to choose`
-                  : "Your personal 3D model — ready to configure & export"}
-              </div>
-            </div>
-          </div>
-          <span
-            className="shrink-0 font-mono text-[13px] transition-transform duration-300 group-hover:translate-x-1"
-            style={{ color: "var(--accent)" }}
-          >
-            →
-          </span>
-        </button>
-      )}
-
-      {/* ✦ Explore World — build a tile from any place on the map */}
-      {!viewingPatronFolders && (
-        <button
-          type="button"
-          onClick={() => router.push("/studio/explore")}
-          className="group mb-8 flex w-full items-center justify-between gap-4 rounded-2xl border border-cream/[0.16] bg-cream/[0.03] px-6 py-4 text-left transition-colors duration-300 hover:border-[var(--accent)]/60 hover:bg-[var(--accent)]/[0.06] cursor-pointer"
-        >
-          <div className="flex items-center gap-3.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cream/20 text-[var(--accent)] transition-colors group-hover:border-[var(--accent)]">
-              <Globe2 size={17} />
-            </span>
-            <div>
-              <div
-                className="mb-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.3em]"
-                style={{ color: "var(--accent)" }}
-              >
-                New · Any place on Earth
-              </div>
-              <div className="font-display text-[18px] font-medium leading-tight text-cream">
-                Explore World
-              </div>
-              <div className="mt-0.5 font-mono text-[11px] text-cream/50">
-                Search the satellite map, frame an area and turn it into a printable 3D tile
-              </div>
-            </div>
-          </div>
-          <span
-            className="shrink-0 font-mono text-[13px] transition-transform duration-300 group-hover:translate-x-1"
-            style={{ color: "var(--accent)" }}
-          >
-            →
-          </span>
-        </button>
-      )}
-
-      {/* View Only Mode Top Banner */}
-      {/* {!hasAccess && (
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-5 py-3.5 backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)] animate-pulse" />
-            <span className="font-mono text-[12px] text-cream/90 font-medium">
-              3D View Only Mode — Models available for preview
-            </span>
-          </div>
-          <button
-            onClick={() => setConnectModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-full bg-cream px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--color-base)] transition-transform hover:scale-[1.03] cursor-pointer"
-          >
-            <span>✨ Connect Studio Code</span>
-          </button>
-        </div>
-      )} */}
-
       <AnimatePresence mode="wait">
         {viewingPatronFolders ? (
           /* ---------------------------------- PATRON FOLDERS VIEW */
@@ -277,12 +143,12 @@ export function StudioPicker({
             exit={{ opacity: 0, y: -14 }}
             transition={{ duration: 0.4, ease }}
           >
-            <button
-              onClick={() => setViewingPatronFolders(false)}
-              className="mb-7 flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] text-cream/50 transition-colors hover:text-cream cursor-pointer"
+            <Link
+              href="/studio"
+              className="mb-7 flex w-fit items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] text-cream/50 no-underline transition-colors hover:text-cream"
             >
-              <span aria-hidden>←</span> Back to studio
-            </button>
+              <span aria-hidden>←</span> Studio
+            </Link>
 
             <StepTimeline steps={["Patron", "Custom model", "Studio"]} currentStep={2} />
             <h1 className="m-0 mb-3 font-display text-[40px] font-normal leading-[1.03] md:text-[52px]">
@@ -335,9 +201,16 @@ export function StudioPicker({
             exit={{ opacity: 0, y: -14 }}
             transition={{ duration: 0.4, ease }}
           >
+            <Link
+              href="/studio"
+              className="mb-7 flex w-fit items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.2em] text-cream/50 no-underline transition-colors hover:text-cream"
+            >
+              <span aria-hidden>←</span> Studio
+            </Link>
+
             <StepTimeline steps={stepLabels} currentStep={currentStepNum} />
             <h1 className="m-0 mb-3 font-display text-[40px] font-normal leading-[1.03] md:text-[52px]">
-              Start with a country.
+              Pick a country.
             </h1>
             <p className="m-0 mb-11 max-w-[480px] text-[15px] leading-[1.7] text-cream/[0.62]">
               {category === "cities"
