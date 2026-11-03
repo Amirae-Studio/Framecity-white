@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Folder } from "lucide-react";
-import { ConnectStudioModal } from "@/components/ConnectStudioModal";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { StudioHeader } from "@/components/studio/StudioHeader";
 import { brand } from "@/lib/brand";
 
@@ -33,39 +31,13 @@ const paths = [
 const steps = [
   { title: "Pick a place", body: "Start from a curated skyline or search anywhere on the map." },
   { title: "Shape it in 3D", body: "Choose size, frame and finish in the live configurator." },
-  { title: "Print it", body: "Download a print-ready 3MF file for your printer." },
+  { title: "Print it", body: "Get the print-ready 3MF file from the main website." },
 ];
 
-export function StudioHome({
-  hasAccess = false,
-  email = "",
-  isPatron = false,
-  patronFolders = [],
-}: {
-  hasAccess?: boolean;
-  email?: string;
-  isPatron?: boolean;
-  patronFolders?: string[];
-}) {
-  const [connectModalOpen, setConnectModalOpen] = useState(!hasAccess);
-
-  // One folder opens straight in the configurator; several get a chooser.
-  const patronHref =
-    patronFolders.length > 1
-      ? "/studio/models?view=custom"
-      : patronFolders.length === 1
-        ? `/studio/configure?type=patron&location=${encodeURIComponent(patronFolders[0])}`
-        : "/studio/configure?type=patron";
-
+export function StudioHome() {
   return (
     <div className="studio-backdrop flex min-h-dvh flex-col text-cream">
-      <ConnectStudioModal
-        isOpen={connectModalOpen}
-        onClose={() => setConnectModalOpen(false)}
-        email={email}
-      />
-
-      <StudioHeader email={email} />
+      <StudioHeader />
 
       {/* Hero — the skyline at last light, copy set low over the streets */}
       <section className="px-3 pt-3 md:px-5">
@@ -195,22 +167,6 @@ export function StudioHome({
             </motion.div>
           ))}
 
-          {isPatron && (
-            <Link
-              href={patronHref}
-              className="group flex items-center justify-between gap-4 border-b border-cream/15 py-5 text-cream no-underline"
-            >
-              <span className="flex items-center gap-3">
-                <Folder size={17} style={{ color: "var(--accent)" }} />
-                <span className="text-[15px]">Your patron models</span>
-              </span>
-              <ArrowRight
-                size={18}
-                className="shrink-0 transition-transform duration-300 group-hover:translate-x-1"
-                style={{ color: "var(--accent)" }}
-              />
-            </Link>
-          )}
         </div>
 
         <ol className="m-0 mt-20 grid list-none grid-cols-1 gap-10 p-0 sm:grid-cols-3">

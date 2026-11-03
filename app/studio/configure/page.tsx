@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { fetchStudioCities, fetchStudioBuildings, checkPatronAccess } from "@/app/studio/actions";
-import { toNavUser } from "@/lib/user";
+import { fetchStudioCities, fetchStudioBuildings } from "@/app/studio/actions";
 import { StudioConfigurator } from "@/components/studio/StudioConfigurator";
 
 export const metadata = {
@@ -13,45 +11,10 @@ export default async function ConfigurePage({
 }: {
   searchParams: Promise<{ type?: string; city?: string; location?: string }>;
 }) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/studio"); // middleware backstop
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("has_access")
-    .eq("id", user.id)
-    .single();
-  const hasAccess = Boolean(profile?.has_access);
-
   const params = await searchParams;
 
-  if (params.type === "patron") {
-    const { isPatron, username } = await checkPatronAccess();
-    if (!isPatron) redirect("/studio");
-
-    const folder = params.location || "";
-    const folderDisplayName = folder ? folder.charAt(0).toUpperCase() + folder.slice(1) : "Custom Model";
-
-    return (
-      <StudioConfigurator
-        type="patron"
-        city={{ slug: username, name: username }}
-        location={{
-          slug: folder || username,
-          name: folderDisplayName,
-          area: "Patron Exclusive",
-          coords: "R2 Cloud Storage",
-        }}
-        user={toNavUser(user)}
-        hasAccess={true}
-        patronUsername={username}
-      />
-    );
-  }
+  // Patron uploads need an account, and the studio no longer has sign-in.
+  if (params.type === "patron") redirect("/studio");
 
   if (params.type === "building") {
     const dbBuildings = await fetchStudioBuildings();
@@ -70,8 +33,8 @@ export default async function ConfigurePage({
           area: building.area || "",
           coords: building.coords || "",
         }}
-        user={toNavUser(user)}
-        hasAccess={hasAccess}
+        user={null}
+        hasAccess={false}
       />
     );
   }
@@ -88,8 +51,8 @@ export default async function ConfigurePage({
       type="city"
       city={{ slug: city.slug, name: city.name }}
       location={location}
-      user={toNavUser(user)}
-      hasAccess={hasAccess}
+      user={null}
+      hasAccess={false}
     />
   );
 }

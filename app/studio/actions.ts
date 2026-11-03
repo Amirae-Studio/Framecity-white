@@ -37,13 +37,7 @@ export async function getModelFiles(
 ): Promise<ModelFile[]> {
   if (!prefix) return [];
 
-  // Auth check — still via Supabase
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
-
+  // Public: the studio is an open, view-only showcase.
   // Fetch file list from R2
   const r2Bucket = resolveR2Bucket(bucketName);
   console.log(`[R2] listR2Objects bucket="${r2Bucket}" prefix="${prefix}"`);

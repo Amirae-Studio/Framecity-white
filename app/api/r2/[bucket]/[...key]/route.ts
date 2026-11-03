@@ -19,17 +19,17 @@ export async function GET(
     return new NextResponse("Not found", { status: 404 });
   }
 
-  // Only authenticated users can stream 3D models for preview & viewport rendering.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
-
-  // For patron bucket: verify the requesting user owns the username prefix.
+  // City and building models stream to anyone — the studio is view-only and
+  // public. Patron uploads stay private to their owner.
   if (bucket === R2_BUCKET.patron) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const requestedUsername = objectKey.split("/")[0]?.toLowerCase() ?? "";
 
     const { data: profile } = await supabase

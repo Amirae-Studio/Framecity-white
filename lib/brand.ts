@@ -11,6 +11,8 @@ export const brand = {
   logoHeight: 96,
   /** Short line under the studio heading. */
   tagline: "Pick any place on Earth, shape it in 3D, and print your own piece of the skyline at home.",
+  /** This studio is view-only; downloads send people here instead. */
+  mainSiteUrl: "https://frame-city.vercel.app/",
   /** Contact for the footer; null hides it. */
   supportEmail: null as string | null,
 };

@@ -19,17 +19,14 @@ import type { NavUser } from "@/lib/user";
 import { useTheme } from "@/lib/theme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getModelFiles, getPatronModelFiles, type ModelFile } from "@/app/studio/actions";
-import { recordDownload } from "@/app/actions/downloads";
-import { TempAccessModal } from "@/components/TempAccessModal";
-import { BackerCrowdfundModal } from "@/components/BackerCrowdfundModal";
-import { ConnectStudioModal } from "@/components/ConnectStudioModal";
+import { MainSiteModal } from "./MainSiteModal";
+import { brand } from "@/lib/brand";
 import type { GizmoMode } from "./StudioScene";
-import { exportTo3MF, collectTransformedMeshes, type ExtraPlate } from "@/lib/3mfExporter";
 import Scrubber from "../ui/Scrubber";
 import { Building2, Frame, Palette, Road, Ruler, Shrub, SquareDimensions, TreePine } from "lucide-react";
 import { SizePanel, BED_MARGIN, type Dims, type SizeAxis } from "./SizePanel";
 import { FramePanel } from "./FramePanel";
-import { buildFrame, frameSTL, seatHeight, FRAME_DEFAULTS, type FrameBuild, type FrameOptions } from "@/lib/frame";
+import { buildFrame, seatHeight, FRAME_DEFAULTS, type FrameBuild, type FrameOptions } from "@/lib/frame";
 import SegmentedToggle from "../ui/Switch";
 import { TerrainModePicker, type TerrainChoice } from "@/components/explore/TerrainModePicker";
 
@@ -47,8 +44,6 @@ const StudioScene = dynamic(() => import("./StudioScene"), {
     </div>
   ),
 });
-
-type ExportFormat = "3mf" | "stl";
 
 /** World-space bounds of everything visible under `root` — what will print. */
 function measureVisible(root: THREE.Object3D, refresh: boolean): THREE.Box3 {
@@ -111,16 +106,10 @@ export function StudioConfigurator({
   const [frameOpts, setFrameOpts] = useState<FrameOptions>(FRAME_DEFAULTS);
   const [frame, setFrame] = useState<FrameBuild | null>(null);
   const [frameBusy, setFrameBusy] = useState(false);
-  const [frameDownload, setFrameDownload] = useState<"stl" | "3mf" | null>(null);
   const patchFrame = useCallback((p: Partial<FrameOptions>) => setFrameOpts((o) => ({ ...o, ...p })), []);
 
-  // Download quota & export states
-  const [exportingAs, setExportingAs] = useState<ExportFormat | null>(null);
-  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
-  const [downloadLimitModal, setDownloadLimitModal] = useState(false);
-  const [tempAccessModalOpen, setTempAccessModalOpen] = useState(false);
-  const [backerCrowdfundModalOpen, setBackerCrowdfundModalOpen] = useState(false);
-  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  // View-only studio: every download points to the main website instead.
+  const [mainSiteOpen, setMainSiteOpen] = useState(false);
   const [revitInfoModal, setRevitInfoModal] = useState(false);
 
   // Active dashboard tab state
@@ -317,44 +306,8 @@ export function StudioConfigurator({
   }
 
   /** The frame as a 3MF plate object: the body, plus the letters as a second-colour part. */
-  function framePlate(f: FrameBuild): ExtraPlate {
-    return {
-      name: "Frame",
-      geometry: f.geometry,
-      color: frameOpts.color,
-      parts: f.text ? [{ name: "Frame text", geometry: f.text, color: frameOpts.labelColor }] : [],
-      opening: frameOpts.back === "open" ? [f.size.opening.w - frameOpts.lip * 2, f.size.opening.d - frameOpts.lip * 2] : undefined,
-    };
-  }
-
-  async function downloadFrame(format: "stl" | "3mf") {
-    if (!hasAccess) {
-      setBackerCrowdfundModalOpen(true);
-      return;
-    }
-    if (!frame) return;
-    setFrameDownload(format);
-    try {
-      const blob =
-        format === "stl"
-          ? await frameSTL(frame.text ? [frame.geometry, frame.text] : [frame.geometry])
-          : await exportTo3MF(new THREE.Group(), {
-              printerId,
-              frameOnly: framePlate(frame),
-            });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `framecity-${city.slug}-${location.slug}-frame.${format}`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setDownloadNotice(`Frame ${format.toUpperCase()} ready — ${Math.round(frame.size.w)} × ${Math.round(frame.size.d)} mm.`);
-    } catch (err) {
-      console.error(err);
-      alert("Couldn't export the frame.");
-    } finally {
-      setFrameDownload(null);
-    }
+  function downloadFrame() {
+    setMainSiteOpen(true);
   }
 
   /** Sits the model on the bed: lowest point at zero height. */
@@ -419,190 +372,13 @@ export function StudioConfigurator({
     measure(false);
   }
 
-  // Either format is available at any point. Colours are a property of the
-  // model, not a precondition for 3MF — with them off it just exports in one
-  // colour.
-  async function downloadModel(format: ExportFormat) {
-    if (!hasAccess) {
-      setBackerCrowdfundModalOpen(true);
-      return;
-    }
-
-    const mesh = meshRef.current;
-    if (!mesh) return;
-
-    setExportingAs(format);
-    setDownloadNotice(null);
-
-    const res = await recordDownload(city.slug, location.slug);
-    if (!res.ok) {
-      setExportingAs(null);
-      if (res.isTempAccess) {
-        setTempAccessModalOpen(true);
-      } else if (res.error === "limit_reached" || res.remaining === 0) {
-        setDownloadLimitModal(true);
-      } else if (
-        res.error?.includes("unlock access") ||
-        res.error?.includes("valid code") ||
-        res.error === "Not authenticated"
-      ) {
-        setBackerCrowdfundModalOpen(true);
-      } else {
-        alert(res.error || "Failed to process download quota.");
-      }
-      return;
-    }
-
-    try {
-      if (format === "3mf") {
-        const withFrame = frameOn && frame;
-        const blob = await exportTo3MF(mesh, {
-          printerId,
-          extra: withFrame ? [framePlate(frame)] : [],
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `framecity-${city.slug}-${location.slug}.3mf`;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        const colorNote =
-          (cityCtl.enableColors
-            ? " — colors included"
-            : " — single color. Turn on Filament Colors for a multi-color file") +
-          (withFrame ? ". Frame is on plate 2." : ".");
-        if (res.tier === "explorer" && res.remaining !== undefined) {
-          setDownloadNotice(
-            `Download recorded! ${res.remaining} downloads remaining this month. (3MF)`
-          );
-        } else {
-          setDownloadNotice(`Download recorded! 3MF file ready${colorNote}`);
-        }
-      } else {
-        const { STLExporter } = await import(
-          "three/examples/jsm/exporters/STLExporter.js"
-        );
-        const entries = collectTransformedMeshes(mesh);
-        if (entries.length === 0) {
-          throw new Error("No visible meshes found to export.");
-        }
-
-        const exportGroup = new THREE.Group();
-        entries.forEach((entry) => {
-          const exportMesh = new THREE.Mesh(entry.geometry);
-          exportGroup.add(exportMesh);
-        });
-
-        const data = new STLExporter().parse(exportGroup, { binary: true });
-        entries.forEach((e) => e.geometry.dispose());
-
-        const buffer = (data as DataView).buffer as ArrayBuffer;
-        const blob = new Blob([buffer], { type: "model/stl" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `framecity-${city.slug}-${location.slug}.stl`;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        if (res.tier === "explorer" && res.remaining !== undefined) {
-          setDownloadNotice(
-            `Download recorded! ${res.remaining} downloads remaining this month.`
-          );
-        } else {
-          setDownloadNotice("Download recorded! STL file ready.");
-        }
-      }
-    } catch (err) {
-      console.error("Export error:", err);
-      alert(`Failed to generate ${format.toUpperCase()} file.`);
-    } finally {
-      setExportingAs(null);
-    }
+  function downloadModel() {
+    setMainSiteOpen(true);
   }
 
   return (
     <div className="flex min-h-dvh flex-col bg-base text-cream">
-      {/* Toast Notice */}
-      <AnimatePresence>
-        {downloadNotice && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-[var(--accent)] bg-deep/90 px-6 py-3 font-mono text-[12px] text-cream shadow-2xl backdrop-blur-md flex items-center gap-3"
-          >
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)] animate-pulse" />
-            <span>{downloadNotice}</span>
-            <button
-              onClick={() => setDownloadNotice(null)}
-              className="ml-2 text-cream/40 hover:text-cream text-[14px]"
-            >
-              ✕
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Explorer Monthly Limit Modal */}
-      <AnimatePresence>
-        {downloadLimitModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-[420px] rounded-2xl border border-cream/[0.16] bg-panel p-6 shadow-2xl"
-            >
-              <div className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#e07a5f]">
-                Quota Limit Reached
-              </div>
-              <h2 className="m-0 mb-3 font-display text-[24px] font-medium text-cream">
-                Monthly Limit Reached
-              </h2>
-              <p className="m-0 mb-6 text-[14px] leading-[1.6] text-cream/70">
-                You have reached your <strong className="text-cream">25 downloads per month</strong> limit on the Explorer tier.
-                Your quota will automatically reset on the 1st of next month.
-              </p>
-              <div className="flex flex-col gap-2.5">
-                <Link
-                  href="/account"
-                  className="w-full rounded-full bg-cream py-3 text-center text-[13.5px] font-medium text-[var(--color-base)] no-underline transition-transform hover:scale-[1.02]"
-                >
-                  View Account Quota
-                </Link>
-                <button
-                  onClick={() => setDownloadLimitModal(false)}
-                  className="w-full rounded-full border border-cream/20 py-3 text-center text-[13.5px] text-cream/70 hover:bg-cream/5"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Temporary Access Security Policy Modal */}
-      <TempAccessModal
-        isOpen={tempAccessModalOpen}
-        onClose={() => setTempAccessModalOpen(false)}
-      />
-
-      {/* Crowdfunding Backer Modal (MakerWorld & Kickstarter) */}
-      <BackerCrowdfundModal
-        isOpen={backerCrowdfundModalOpen}
-        onClose={() => setBackerCrowdfundModalOpen(false)}
-        onOpenConnectModal={() => setConnectModalOpen(true)}
-      />
-
-      {/* Connect Studio Modal */}
-      <ConnectStudioModal
-        isOpen={connectModalOpen}
-        onClose={() => setConnectModalOpen(false)}
-        email={user?.email || ""}
-      />
+      <MainSiteModal isOpen={mainSiteOpen} onClose={() => setMainSiteOpen(false)} />
 
       {/* Revit Info Modal */}
       <AnimatePresence>
@@ -737,43 +513,16 @@ export function StudioConfigurator({
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
-          {user && (
-            <a
-              href="/account"
-              title={`Signed in as ${user.email}`}
-              className="group flex items-center gap-2 rounded-full border border-cream/[0.16] py-[5px] pl-[5px] pr-3 no-underline transition-colors duration-300 hover:border-cream/40"
-            >
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatarUrl}
-                  alt=""
-                  referrerPolicy="no-referrer"
-                  className="h-6 w-6 rounded-full object-cover"
-                />
-              ) : (
-                <span
-                  className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold text-[var(--color-base)]"
-                  style={{ background: "var(--accent)" }}
-                >
-                  {user.initial}
-                </span>
-              )}
-              <span className="hidden max-w-[90px] truncate text-[12.5px] text-cream/75 transition-colors group-hover:text-cream sm:inline">
-                {user.name}
-              </span>
-            </a>
-          )}
-          {!hasAccess && (
-            <button
-              onClick={() => setConnectModalOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-1 font-mono text-[10.5px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all cursor-pointer"
-              title="Studio View Only — Click to Connect Access Code"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-              <span>View Only · Connect Code</span>
-            </button>
-          )}
+          <a
+            href={brand.mainSiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden items-center gap-1.5 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-1 font-mono text-[10.5px] font-bold uppercase tracking-[0.14em] text-[var(--accent-text)] no-underline transition-all hover:bg-[var(--accent)]/20 sm:inline-flex"
+            title="This studio is view-only — downloads are on the main website"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+            View only
+          </a>
           <ThemeToggle />
           <button
             onClick={openFrame}
@@ -789,8 +538,7 @@ export function StudioConfigurator({
           </button>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => downloadModel("3mf")}
-              disabled={exportingAs !== null}
+              onClick={downloadModel}
               className="group flex items-center gap-2 rounded-full bg-cream px-5 py-[10px] text-[13px] text-[var(--color-base)] transition-transform duration-300 hover:scale-[1.03] disabled:opacity-50"
               title="Download as 3MF — keeps layers separate for multi-color printing"
             >
@@ -803,21 +551,14 @@ export function StudioConfigurator({
                   strokeLinejoin="round"
                 />
               </svg>
-              {exportingAs === "3mf" ? (
-                "Exporting…"
-              ) : (
-                <>
-                  <span className="hidden sm:inline">Download </span>3MF
-                </>
-              )}
+              <span className="hidden sm:inline">Download </span>3MF
             </button>
             <button
-              onClick={() => downloadModel("stl")}
-              disabled={exportingAs !== null}
+              onClick={downloadModel}
               className="rounded-full border border-cream/25 px-3.5 py-[9px] font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-cream/70 transition-colors duration-200 hover:border-cream/45 hover:text-cream disabled:opacity-50"
               title="Download as STL — a single merged mesh"
             >
-              {exportingAs === "stl" ? "…" : "STL"}
+              STL
             </button>
           </div>
         </div>
@@ -963,7 +704,7 @@ export function StudioConfigurator({
                     defaultLabel={location.name}
                     onShrinkToFit={shrinkForFrame}
                     onDownload={downloadFrame}
-                    downloading={frameDownload}
+                    downloading={null}
                   />
                 )}
 
