@@ -61,8 +61,8 @@ function Bed({ w, d, light }: { w: number; d: number; light: boolean }) {
     return { grid, border };
   }, [w, d]);
 
-  const plate = light ? "#e3d9d0" : "#1c1618";
-  const lineColor = light ? "#3a2c26" : "#f3dcc8";
+  const plate = light ? "#d8ccbf" : "#1d1840";
+  const lineColor = light ? "#3a2c26" : "#dcd4ff";
 
   return (
     <group>

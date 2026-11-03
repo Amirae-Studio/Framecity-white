@@ -4,36 +4,23 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Folder } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Box, Folder, Globe2, Layers, MapPin, UserRound } from "lucide-react";
 import { ConnectStudioModal } from "@/components/ConnectStudioModal";
-import { StudioHeader } from "@/components/studio/StudioHeader";
+import { StudioShell } from "@/components/studio/StudioShell";
 import { brand } from "@/lib/brand";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const paths = [
-  {
-    href: "/studio/models",
-    image: "/hero-city.jpg",
-    imagePosition: "50% 55%",
-    tag: "Recommended",
-    title: "Curated cities",
-    body: "Hand-modelled districts and landmarks with high detail, tuned for clean prints.",
-  },
-  {
-    href: "/studio/explore",
-    image: "/studio/golden-skyline.webp",
-    imagePosition: "50% 40%",
-    tag: "Beta",
-    title: "Anywhere on the map",
-    body: "Draw a frame over any place on Earth and generate it from open map data.",
-  },
-];
-
-const steps = [
-  { title: "Pick a place", body: "Start from a curated skyline or search anywhere on the map." },
-  { title: "Shape it in 3D", body: "Choose size, frame and finish in the live configurator." },
-  { title: "Print it", body: "Download a print-ready 3MF file for your printer." },
+// Street grid for the decorative map card — a handful of crooked lines.
+const streets = [
+  "M0 30 L60 42 L120 34 L190 50 L260 40",
+  "M0 80 L50 74 L110 90 L170 82 L260 96",
+  "M0 130 L70 122 L140 138 L200 128 L260 140",
+  "M30 0 L40 50 L28 100 L44 160",
+  "M95 0 L88 60 L104 120 L92 160",
+  "M160 0 L170 46 L156 104 L168 160",
+  "M220 0 L212 52 L228 110 L216 160",
+  "M60 42 L110 90 M140 138 L190 50 M200 128 L228 110",
 ];
 
 export function StudioHome({
@@ -57,190 +44,186 @@ export function StudioHome({
         ? `/studio/configure?type=patron&location=${encodeURIComponent(patronFolders[0])}`
         : "/studio/configure?type=patron";
 
+  const startHere = [
+    { href: "/studio/models", image: "/hero-city.jpg", title: "Curated cities", meta: "Hand-modelled · high detail" },
+    { href: "/studio/explore", image: "/studio/golden-skyline.webp", title: "Anywhere on the map", meta: "Open map data · Beta" },
+    ...(isPatron
+      ? [{ href: patronHref, image: "/studio/dusk-skyline.webp", title: "Your patron models", meta: "Private uploads" }]
+      : []),
+  ];
+
   return (
-    <div className="studio-backdrop flex min-h-dvh flex-col text-cream">
+    <StudioShell email={email}>
       <ConnectStudioModal
         isOpen={connectModalOpen}
         onClose={() => setConnectModalOpen(false)}
         email={email}
       />
 
-      <StudioHeader email={email} />
-
-      {/* Hero — the skyline at last light, copy set low over the streets */}
-      <section className="px-3 pt-3 md:px-5">
-        <div className="on-media relative flex min-h-[580px] flex-col justify-end overflow-hidden rounded-[28px] md:h-[min(84dvh,820px)]">
-          <Image
-            src="/studio/dusk-skyline.webp"
-            alt="Manhattan at last light, the Empire State Building catching the sun"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[50%_35%] transition-[filter] duration-500"
-            style={{ filter: "var(--hero-filter)" }}
-          />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#120d0c]/90 via-[#120d0c]/35 to-transparent" />
-          <div
-            aria-hidden
-            className="absolute inset-0 mix-blend-screen"
-            style={{ background: "radial-gradient(70% 55% at 20% 100%, var(--glow), transparent 70%)" }}
-          />
-
-          <div className="relative grid gap-8 p-6 md:grid-cols-[1fr_auto] md:items-end md:p-12">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease }}
-            >
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/25 px-3 py-1 font-mono text-[10.5px] font-bold uppercase tracking-[0.24em] text-white/90 backdrop-blur-md">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-                {brand.name} Studio
-              </span>
-              <h1 className="m-0 mt-4 font-display text-[46px] font-normal leading-[0.98] tracking-[-0.01em] text-white md:text-[88px]">
-                Every skyline
-                <br />
-                <em className="font-normal text-[#f2b98c]">has a golden hour.</em>
-              </h1>
-              <p className="mt-5 max-w-[500px] text-[15px] leading-relaxed text-white/80 md:text-[17px]">
-                {brand.tagline}
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/studio/models"
-                  className="group inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent)] px-6 text-[14px] font-medium text-white no-underline shadow-[0_14px_34px_-12px_rgba(236,138,79,0.8)] transition-transform duration-300 hover:-translate-y-0.5"
-                >
-                  Browse curated cities
-                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-                </Link>
-                <Link
-                  href="/studio/explore"
-                  className="inline-flex h-12 items-center rounded-full border border-white/35 bg-white/10 px-6 text-[14px] font-medium text-white no-underline backdrop-blur-md transition-colors duration-300 hover:bg-white/20"
-                >
-                  Pick any place
-                </Link>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="hidden border-l border-white/25 pl-5 font-mono text-[10.5px] uppercase leading-[1.9] tracking-[0.18em] text-white/65 md:block"
-            >
-              <div className="text-white">Manhattan, NY</div>
-              <div>40.7484° N</div>
-              <div>73.9857° W</div>
-              <div className="mt-2 text-[var(--accent)]">● Last light</div>
-            </motion.div>
+      <div className="grid flex-1 grid-cols-1 gap-5 px-4 pb-4 pt-8 md:grid-cols-[minmax(0,400px)_1fr_minmax(0,300px)] md:grid-rows-[1fr_auto] md:px-8 md:pb-8 md:pt-10">
+        {/* Left — title and the list of ways in */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease }}
+          className="flex flex-col gap-7"
+        >
+          <div>
+            <div className="font-mono text-[11px] font-bold uppercase tracking-[0.26em] text-cream/70">
+              {brand.name} Studio
+            </div>
+            <h1 className="m-0 mt-2 font-display text-[60px] font-normal leading-[0.95] tracking-[-0.01em] md:text-[92px]">
+              Your <em className="text-glow font-normal">City</em>
+            </h1>
+            <div className="mt-3 flex items-center gap-2 text-[16px] text-cream/85">
+              <MapPin size={17} strokeWidth={1.6} />
+              Anywhere on Earth
+            </div>
+            <p className="mt-4 max-w-[340px] text-[15px] leading-relaxed text-cream/75">{brand.tagline}</p>
           </div>
-        </div>
-      </section>
 
-      {/* Starting points — editorial rows */}
-      <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 pb-20 pt-16 md:pt-24">
-        <div className="mb-10 grid gap-4 md:grid-cols-[1fr_1fr] md:items-end">
-          <h2 className="m-0 font-display text-[36px] font-normal leading-[1.05] md:text-[52px]">
-            Where does your
-            <br />
-            <em className="text-glow">city begin?</em>
-          </h2>
-          <p className="m-0 max-w-[420px] text-[15px] leading-relaxed text-cream/60 md:justify-self-end">
-            Two ways in. Both end in the same 3D studio, ready to frame and print.
-          </p>
-        </div>
-
-        <div className="border-t border-cream/15">
-          {paths.map((p, i) => (
-            <motion.div
-              key={p.href}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.5, ease, delay: i * 0.08 }}
-            >
-              <Link
-                href={p.href}
-                className="group grid grid-cols-[auto_1fr_auto] items-center gap-5 border-b border-cream/15 py-6 text-cream no-underline md:grid-cols-[64px_220px_1fr_auto] md:gap-8 md:py-8"
-              >
-                <span className="hidden font-display text-[28px] italic text-cream/40 md:block">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="relative block h-[72px] w-[96px] overflow-hidden rounded-xl md:h-[130px] md:w-[220px] md:rounded-2xl">
-                  <Image
-                    src={p.image}
-                    alt=""
-                    fill
-                    sizes="220px"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-                    style={{ objectPosition: p.imagePosition }}
-                  />
-                </span>
-                <span className="min-w-0">
-                  <span className="flex flex-wrap items-center gap-3">
-                    <span className="font-display text-[26px] font-medium leading-tight transition-colors duration-300 group-hover:text-[var(--accent-text)] md:text-[40px]">
-                      {p.title}
-                    </span>
-                    <span className="rounded-full border border-[var(--accent)]/45 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--accent-text)]">
-                      {p.tag}
-                    </span>
-                  </span>
-                  <span className="mt-1.5 hidden max-w-[520px] text-[14.5px] leading-relaxed text-cream/60 sm:block">
-                    {p.body}
-                  </span>
-                </span>
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-cream/20 transition-all duration-300 group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-white">
-                  <ArrowUpRight size={18} />
-                </span>
+          <div className="glass rounded-3xl p-4 md:p-5">
+            <div className="mb-3 flex items-center justify-between px-1">
+              <span className="text-[16px] font-medium">Start here</span>
+              <Link href="/studio/models" className="text-[12px] text-cream/60 no-underline hover:text-cream">
+                View all
               </Link>
-            </motion.div>
-          ))}
+            </div>
+            <ul className="m-0 flex list-none flex-col gap-1 p-0">
+              {startHere.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    className="group flex items-center gap-4 rounded-2xl p-2 text-cream no-underline transition-colors hover:bg-white/[0.06]"
+                  >
+                    <span className="relative h-[68px] w-[96px] shrink-0 overflow-hidden rounded-xl ring-1 ring-white/15">
+                      <Image
+                        src={item.image}
+                        alt=""
+                        fill
+                        sizes="96px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[15px] leading-snug">{item.title}</span>
+                      <span className="mt-1 block text-[12.5px] text-cream/55">{item.meta}</span>
+                    </span>
+                    <ArrowRight
+                      size={16}
+                      className="shrink-0 text-cream/40 transition-all group-hover:translate-x-0.5 group-hover:text-[var(--accent)]"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
 
-          {isPatron && (
-            <Link
-              href={patronHref}
-              className="group flex items-center justify-between gap-4 border-b border-cream/15 py-5 text-cream no-underline"
-            >
-              <span className="flex items-center gap-3">
-                <Folder size={17} style={{ color: "var(--accent)" }} />
-                <span className="text-[15px]">Your patron models</span>
+        {/* Centre stays clear so the city shows through */}
+        <div aria-hidden className="hidden md:block" />
+
+        {/* Right — print card and map card */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease, delay: 0.1 }}
+          className="flex flex-col gap-5"
+        >
+          <div className="glass rounded-3xl p-5">
+            <div className="flex items-center justify-between text-[14px] text-cream/80">
+              Print ready
+              <ArrowUpRight size={15} className="text-cream/50" />
+            </div>
+            <div className="mt-4 flex items-center gap-4">
+              <span
+                className="flex h-14 w-14 items-center justify-center rounded-2xl text-[var(--accent)]"
+                style={{ filter: "drop-shadow(0 0 10px var(--glow))" }}
+              >
+                <Box size={38} strokeWidth={1.2} />
               </span>
-              <ArrowRight
-                size={18}
-                className="shrink-0 transition-transform duration-300 group-hover:translate-x-1"
-                style={{ color: "var(--accent)" }}
-              />
-            </Link>
-          )}
-        </div>
-
-        <ol className="m-0 mt-20 grid list-none grid-cols-1 gap-10 p-0 sm:grid-cols-3">
-          {steps.map((step, i) => (
-            <li key={step.title}>
-              <div className="mb-5 flex items-center gap-3">
-                <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-[var(--accent-text)]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="h-px flex-1 bg-gradient-to-r from-[var(--accent)]/60 to-transparent" />
+              <div>
+                <div className="font-display text-[40px] leading-none">.3mf</div>
+                <div className="mt-1.5 text-[13px] text-cream/70">Layers kept separate</div>
               </div>
-              <div className="font-display text-[24px] font-medium">{step.title}</div>
-              <div className="mt-1.5 text-[14px] leading-relaxed text-cream/60">{step.body}</div>
-            </li>
-          ))}
-        </ol>
-      </main>
+            </div>
+            <div className="mt-3 text-[12.5px] text-cream/55">Ready for multi-colour printing</div>
+          </div>
 
-      <footer className="border-t border-cream/10">
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col items-start justify-between gap-2 px-6 py-6 text-[12px] text-cream/50 sm:flex-row sm:items-center">
-          <span>
-            © {new Date().getFullYear()} {brand.name}. All rights reserved.
-          </span>
-          {brand.supportEmail && (
-            <a href={`mailto:${brand.supportEmail}`} className="text-cream/60 no-underline hover:text-cream">
-              {brand.supportEmail}
-            </a>
+          <Link href="/studio/explore" className="glass group block overflow-hidden rounded-3xl p-5 text-cream no-underline">
+            <div className="flex items-center justify-between text-[14px] text-cream/80">
+              Explore map
+              <ArrowUpRight
+                size={15}
+                className="text-cream/50 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </div>
+            <div className="relative mt-4 overflow-hidden rounded-2xl bg-black/25 ring-1 ring-white/10">
+              <svg viewBox="0 0 260 160" className="block h-auto w-full" aria-hidden>
+                <g stroke="rgba(var(--ink-rgb),0.22)" strokeWidth="1" fill="none">
+                  {streets.map((d) => (
+                    <path key={d} d={d} />
+                  ))}
+                </g>
+                <path
+                  d="M58 118 C 90 112, 96 82, 128 80 S 170 60, 196 46"
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  style={{ filter: "drop-shadow(0 0 5px var(--accent))" }}
+                />
+                <circle cx="58" cy="118" r="5" fill="#7cc4ff" style={{ filter: "drop-shadow(0 0 6px #7cc4ff)" }} />
+                <path
+                  d="M196 22 C186 22 180 29 180 37 C180 48 196 60 196 60 C196 60 212 48 212 37 C212 29 206 22 196 22 Z"
+                  fill="var(--accent)"
+                  style={{ filter: "drop-shadow(0 0 8px var(--accent))" }}
+                />
+                <circle cx="196" cy="37" r="5" fill="#fff" />
+              </svg>
+            </div>
+            <div className="mt-3 text-[12.5px] text-cream/55">Draw a frame over any place and build it in 3D.</div>
+          </Link>
+        </motion.div>
+
+        {/* Bottom — glass tiles, with the main action lit up */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease, delay: 0.2 }}
+          className="grid grid-cols-2 gap-3 md:col-span-3 md:grid-cols-4 md:gap-4"
+        >
+          <Tile href="/studio/models" icon={<Layers size={24} strokeWidth={1.5} />} title="Curated" sub="Hand-modelled" />
+          <Tile href="/studio/explore" icon={<Globe2 size={24} strokeWidth={1.5} />} title="Any place" sub="Open map data" />
+          <Link
+            href="/studio/models"
+            className="glass-glow group col-span-2 flex items-center justify-center gap-3 rounded-3xl px-6 py-6 text-[19px] font-medium no-underline md:col-span-1 md:text-[21px]"
+          >
+            Start designing
+            <ArrowRight size={22} className="transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+          {isPatron ? (
+            <Tile href={patronHref} icon={<Folder size={24} strokeWidth={1.5} />} title="Patron" sub="Your models" />
+          ) : (
+            <Tile href="/account" icon={<UserRound size={24} strokeWidth={1.5} />} title="Account" sub="Downloads & access" />
           )}
-        </div>
-      </footer>
-    </div>
+        </motion.div>
+      </div>
+    </StudioShell>
+  );
+}
+
+function Tile({ href, icon, title, sub }: { href: string; icon: React.ReactNode; title: string; sub: string }) {
+  return (
+    <Link
+      href={href}
+      className="glass flex items-center gap-4 rounded-3xl px-5 py-5 text-cream no-underline transition-transform duration-300 hover:-translate-y-0.5 md:px-6"
+    >
+      <span className="text-cream/85">{icon}</span>
+      <span>
+        <span className="block text-[16px] font-medium md:text-[17px]">{title}</span>
+        <span className="block text-[12.5px] text-cream/60">{sub}</span>
+      </span>
+    </Link>
   );
 }

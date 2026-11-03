@@ -28,7 +28,7 @@ export function BrandLogo({
       className={`inline-flex h-9 items-center gap-2 rounded-full border border-dashed border-cream/30 bg-panel/50 px-3.5 text-cream/65 backdrop-blur-sm ${className}`}
     >
       <ImagePlus size={15} strokeWidth={1.75} />
-      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]">Your logo here</span>
+      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] max-[419px]:hidden">Your logo here</span>
     </span>
   );
 }

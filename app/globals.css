@@ -110,98 +110,139 @@ body {
   --logo-filter: none;
 }
 
-/* Dusk palette for every /studio route, taken from a skyline at last light.
-   Light mode is the haze — mauve-grey sky, slate horizon, copper glints.
-   Dark mode is nightfall — charcoal streets with amber windows. */
-.theme-dusk {
-  --color-base: #ece6e1;
-  --color-panel: #f7f3ef;
-  --color-panel-2: #e2dad3;
-  --color-deep: #ddd4cc;
-  --color-marquee: #e2dad3;
-  --color-cream: #1d181b;
-  --ink-rgb: 29, 24, 27;
-  --accent: #c4622f;
-  --accent-rgb: 196, 98, 47;
-  --accent-text: #a94f20;
-  --haze: #cfc8c9;
-  --horizon: #8f9aab;
-  --glow: rgba(196, 98, 47, 0.16);
-  --hero-filter: saturate(1.02);
-  --hero-veil: rgba(236, 230, 225, 0.92);
-  --grad-warm-a: #e2dad3;
-  --grad-warm-b: #ece6e1;
-  --map-a: #ddd4cc;
-  --map-b: #d3c9c0;
-  --stripe-a: #e2dad3;
-  --stripe-b: #d8cfc7;
-  --logo-filter: invert(1) brightness(0.6) contrast(1.1);
-  color-scheme: light;
+/* Glass palette for every /studio route: frosted panels floating over a city
+   at night. Light mode is golden hour (amber glass, warm street lights);
+   dark mode is neon night (violet sky, pink glow). Ink stays light in both
+   because everything sits on the photo. */
+.theme-glass {
+  --color-base: #0f0b09;
+  --color-panel: rgba(42, 30, 22, 0.55);
+  --color-panel-2: rgba(70, 52, 38, 0.5);
+  --color-deep: rgba(22, 15, 11, 0.62);
+  --color-marquee: rgba(42, 30, 22, 0.55);
+  --color-cream: #fff6ea;
+  --ink-rgb: 255, 246, 234;
+  --accent: #f2b35b;
+  --accent-rgb: 242, 179, 91;
+  --accent-text: #ffcf86;
+  --glow: rgba(242, 179, 91, 0.4);
+  --scene-photo: url("/studio/dusk-skyline.webp");
+  --scene-tint: linear-gradient(180deg, rgba(30, 18, 12, 0.3) 0%, rgba(18, 11, 8, 0.55) 55%, rgba(12, 8, 6, 0.8) 100%);
+  --scene-glow: radial-gradient(70% 50% at 50% 105%, rgba(242, 160, 70, 0.38), transparent 70%);
+  --glass-bg: rgba(255, 238, 220, 0.08);
+  --glass-border: rgba(255, 232, 205, 0.22);
+  --glass-shine: rgba(255, 255, 255, 0.14);
+  --grad-warm-a: rgba(70, 52, 38, 0.5);
+  --grad-warm-b: #0f0b09;
+  --map-a: #2a1e16;
+  --map-b: #1d150f;
+  --stripe-a: #2a1e16;
+  --stripe-b: #1d150f;
+  --logo-filter: none;
+  color-scheme: dark;
   color: var(--color-cream);
 }
 
-:root[data-theme="dark"] .theme-dusk {
-  --color-base: #0e0c0e;
-  --color-panel: #171316;
-  --color-panel-2: #201a1d;
-  --color-deep: #090708;
-  --color-marquee: #171316;
-  --color-cream: #f2e8e0;
-  --ink-rgb: 242, 232, 224;
-  --accent: #ec8a4f;
-  --accent-rgb: 236, 138, 79;
-  --accent-text: #f19a64;
-  --haze: #1d1a21;
-  --horizon: #2f3646;
-  --glow: rgba(236, 138, 79, 0.2);
-  --hero-filter: brightness(0.62) saturate(1.15) contrast(1.05);
-  --hero-veil: rgba(14, 12, 14, 0.95);
-  --grad-warm-a: #201a1d;
-  --grad-warm-b: #0e0c0e;
-  --map-a: #201a1d;
-  --map-b: #171316;
-  --stripe-a: #201a1d;
-  --stripe-b: #171316;
-  --logo-filter: none;
-  color-scheme: dark;
+:root[data-theme="dark"] .theme-glass {
+  --color-base: #07061a;
+  --color-panel: rgba(24, 20, 58, 0.55);
+  --color-panel-2: rgba(44, 36, 92, 0.5);
+  --color-deep: rgba(10, 8, 32, 0.65);
+  --color-marquee: rgba(24, 20, 58, 0.55);
+  --color-cream: #f4f1ff;
+  --ink-rgb: 244, 241, 255;
+  --accent: #ff5fae;
+  --accent-rgb: 255, 95, 174;
+  --accent-text: #ff9ccf;
+  --glow: rgba(255, 95, 174, 0.42);
+  --scene-tint:
+    radial-gradient(60% 40% at 80% 0%, rgba(140, 90, 255, 0.35), transparent 70%),
+    linear-gradient(180deg, rgba(28, 18, 90, 0.72) 0%, rgba(12, 9, 45, 0.82) 55%, rgba(5, 4, 18, 0.92) 100%);
+  --scene-glow: radial-gradient(70% 50% at 50% 105%, rgba(255, 95, 174, 0.32), transparent 70%);
+  --glass-bg: rgba(200, 190, 255, 0.07);
+  --glass-border: rgba(214, 204, 255, 0.2);
+  --glass-shine: rgba(255, 255, 255, 0.12);
+  --grad-warm-a: rgba(44, 36, 92, 0.5);
+  --grad-warm-b: #07061a;
+  --map-a: #18143a;
+  --map-b: #100d2a;
+  --stripe-a: #18143a;
+  --stripe-b: #100d2a;
 }
 
-body:has(.theme-dusk) {
+body:has(.theme-glass) {
   background: var(--color-base);
 }
 
-/* Page backdrop: haze at the top settling into the base, a copper glow low down */
+/* Every panel-coloured surface in the studio is frosted glass */
+.theme-glass [class*="bg-panel"],
+.theme-glass [class*="bg-deep"] {
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+}
+
+/* The city photo behind every page, tinted per mode */
 .studio-backdrop {
-  background:
-    radial-gradient(60% 45% at 90% 100%, var(--glow), transparent 70%),
-    radial-gradient(70% 40% at 0% 0%, color-mix(in srgb, var(--horizon) 22%, transparent), transparent 70%),
-    linear-gradient(180deg, var(--haze) 0%, var(--color-base) 42%);
+  background: var(--scene-glow), var(--scene-tint), var(--scene-photo) center 35% / cover no-repeat;
+  background-color: var(--color-base);
   background-attachment: fixed;
 }
 
-/* Behind the 3D viewer — the model sits on a horizon at dusk */
+/* Behind the 3D viewer — the model sits over the same city, dimmed */
 .studio-stage {
   background:
-    radial-gradient(55% 45% at 50% 100%, var(--glow), transparent 70%),
-    linear-gradient(180deg, var(--haze) 0%, color-mix(in srgb, var(--horizon) 25%, var(--color-base)) 55%, var(--color-base) 100%);
+    var(--scene-glow),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.72)),
+    var(--scene-tint),
+    var(--scene-photo) center 35% / cover no-repeat;
+  background-color: var(--color-base);
 }
 
-/* Copper light catching a glass facade — for accent words */
+/* The big pane of glass a page sits in */
+.glass-frame {
+  background: linear-gradient(160deg, var(--glass-shine), transparent 28%), rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 60px rgba(255, 255, 255, 0.03),
+    0 40px 100px -40px rgba(0, 0, 0, 0.8);
+}
+
+/* Frosted tile */
+.glass {
+  background: linear-gradient(140deg, var(--glass-shine), transparent 45%), var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 24px 50px -28px rgba(0, 0, 0, 0.75);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+}
+
+/* Lit-from-within tile — the primary action and the active nav pill */
+.glass-glow {
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.28), transparent 50%),
+    color-mix(in srgb, var(--accent) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 80%, white);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 0 24px rgba(255, 255, 255, 0.12),
+    0 0 28px var(--glow),
+    0 18px 40px -16px var(--glow);
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+}
+
+/* Accent words: white light warming into the accent */
 .text-glow {
-  background: linear-gradient(100deg, var(--accent-text) 0%, var(--accent) 45%, #e8b07a 100%);
+  background: linear-gradient(100deg, #ffffff 0%, var(--accent-text) 55%, var(--accent) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   padding-right: 0.08em; /* keep the italic overhang inside the clip */
-}
-
-/* Frosted panel */
-.glass {
-  background: color-mix(in srgb, var(--color-panel) 78%, transparent);
-  border: 1px solid rgba(var(--ink-rgb), 0.08);
-  box-shadow: 0 18px 40px -26px rgba(20, 12, 10, 0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 /* Hero legibility scrim — fades the page background into the photo, per theme */

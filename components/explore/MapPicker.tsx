@@ -120,7 +120,7 @@ const SHAPES: [ShapeKind, string, typeof Square][] = [
   ["custom", "Custom", PenTool],
 ];
 
-const ACCENT = "#ec8a4f";
+const ACCENT = "#f2b35b";
 
 export const MIN_SIZE = 150;
 export const MAX_SIZE = 2000;

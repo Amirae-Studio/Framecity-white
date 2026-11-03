@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { StudioHeader } from "@/components/studio/StudioHeader";
+import { StudioShell } from "@/components/studio/StudioShell";
 import { StudioPicker } from "@/components/studio/StudioPicker";
 
 import { fetchStudioCities, fetchStudioBuildings, checkPatronAccess, getPatronSubfolders } from "@/app/studio/actions";
@@ -32,9 +32,7 @@ export default async function StudioModelsPage({
   const { view } = await searchParams;
 
   return (
-    <div className="studio-backdrop flex min-h-dvh flex-col text-cream">
-      <StudioHeader email={email} />
-
+    <StudioShell email={email}>
       <main className="flex flex-1 flex-col">
         <StudioPicker
           initialCities={cities}
@@ -45,6 +43,6 @@ export default async function StudioModelsPage({
           initialView={view === "custom" && isPatron ? "custom" : "handmade"}
         />
       </main>
-    </div>
+    </StudioShell>
   );
 }
