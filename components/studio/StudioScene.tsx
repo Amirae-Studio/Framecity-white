@@ -61,8 +61,8 @@ function Bed({ w, d, light }: { w: number; d: number; light: boolean }) {
     return { grid, border };
   }, [w, d]);
 
-  const plate = light ? "#d9d1c0" : "#16130f";
-  const lineColor = light ? "#3a352b" : "#f2efe9";
+  const plate = light ? "#e3d9d0" : "#1c1618";
+  const lineColor = light ? "#3a2c26" : "#f3dcc8";
 
   return (
     <group>
@@ -953,7 +953,7 @@ export default function StudioScene({
         shadow-bias={-0.0002}
       />
       <directionalLight position={[-6, 4, -5]} intensity={0.6} color="#c8cede" />
-      <directionalLight position={[0, 2, -8]} intensity={0.45} color="#e8d9c4" />
+      <directionalLight position={[0, 2, -8]} intensity={0.45} color="#ffc79a" />
 
       <Bed w={bedW} d={bedD} light={light} />
 

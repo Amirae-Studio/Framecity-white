@@ -23,7 +23,7 @@ export function StepTimeline({
                 initial={false}
                 animate={{
                   scale: isActive ? 1.1 : 1,
-                  borderColor: isDone || isActive ? "var(--accent)" : "rgba(244,241,234,0.16)",
+                  borderColor: isDone || isActive ? "var(--accent)" : "rgba(var(--ink-rgb),0.18)",
                   backgroundColor: isDone ? "var(--accent)" : "transparent",
                 }}
                 transition={{ duration: 0.3 }}
@@ -33,14 +33,14 @@ export function StepTimeline({
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                     <path
                       d="M2 6l2.5 2.5L10 3"
-                      stroke="var(--bg, #0b0b0b)"
+                      stroke="#ffffff"
                       strokeWidth="1.8"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </svg>
                 ) : (
-                  <span style={{ color: isActive ? "var(--accent)" : "rgba(244,241,234,0.4)" }}>
+                  <span style={{ color: isActive ? "var(--accent)" : "rgba(var(--ink-rgb),0.45)" }}>
                     {stepNum}
                   </span>
                 )}

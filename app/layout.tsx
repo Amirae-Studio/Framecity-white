@@ -46,7 +46,7 @@ export default function RootLayout({
         <script
           // Resolve theme before paint to avoid a flash of the wrong mode.
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var m=localStorage.getItem('fc-theme');if(!m){m=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',m);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+            __html: `(function(){try{var m=localStorage.getItem('fc-studio-theme');if(!m){m='light';}document.documentElement.setAttribute('data-theme',m);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
           }}
         />
       </head>

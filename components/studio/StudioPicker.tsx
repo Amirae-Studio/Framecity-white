@@ -123,12 +123,12 @@ export function StudioPicker({
   const stepLabels = category === "buildings" ? BUILDING_STEPS : CITY_STEPS;
 
   return (
-    <div className="relative mx-auto w-full max-w-[1000px] px-6 py-14 md:py-20">
+    <div className="relative mx-auto w-full max-w-[1200px] px-6 py-12 md:py-16">
       {/* ambient animated glow */}
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[420px] w-[620px] -translate-x-1/2 rounded-full blur-[120px]"
-        style={{ background: "var(--accent)", opacity: 0.12 }}
+        style={{ background: "var(--glow)", opacity: 0.6 }}
         animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.16, 0.1] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -152,7 +152,7 @@ export function StudioPicker({
 
             <StepTimeline steps={["Patron", "Custom model", "Studio"]} currentStep={2} />
             <h1 className="m-0 mb-3 font-display text-[40px] font-normal leading-[1.03] md:text-[52px]">
-              Custom Models. <span className="italic">Choose your project.</span>
+              Custom Models. <span className="text-glow italic">Choose your project.</span>
             </h1>
            
 
@@ -220,7 +220,7 @@ export function StudioPicker({
 
             {category === "cities" ? (
               cityCountries.length === 0 ? (
-                <div className="rounded-xl border border-cream/[0.12] bg-panel/60 p-10 text-center">
+                <div className="glass rounded-2xl p-10 text-center">
                   <div className="font-display text-[26px] font-medium text-cream/90 mb-2">
                     Cities will be posted.
                   </div>
@@ -273,7 +273,7 @@ export function StudioPicker({
                 </div>
               )
             ) : buildingCountries.length === 0 ? (
-              <div className="rounded-xl border border-cream/[0.12] bg-panel/60 p-10 text-center">
+              <div className="glass rounded-2xl p-10 text-center">
                 <div className="font-display text-[26px] font-medium text-cream/90 mb-2">
                   Buildings will be posted.
                 </div>
@@ -344,7 +344,7 @@ export function StudioPicker({
 
             <StepTimeline steps={stepLabels} currentStep={currentStepNum} />
             <h1 className="m-0 mb-3 font-display text-[40px] font-normal leading-[1.03] md:text-[52px]">
-              {selectedCountry}. <span className="italic">Select a city.</span>
+              {selectedCountry}. <span className="text-glow italic">Select a city.</span>
             </h1>
             <p className="m-0 mb-11 max-w-[480px] text-[15px] leading-[1.7] text-cream/[0.62]">
               Choose a city in {selectedCountry} to view printable districts.
@@ -419,7 +419,7 @@ export function StudioPicker({
 
             <StepTimeline steps={stepLabels} currentStep={currentStepNum} />
             <h1 className="m-0 mb-3 font-display text-[40px] font-normal leading-[1.03] md:text-[52px]">
-              {city.name}. <span className="italic">Now the block.</span>
+              {city.name}. <span className="text-glow italic">Now the block.</span>
             </h1>
             <p className="m-0 mb-11 max-w-[480px] text-[15px] leading-[1.7] text-cream/[0.62]">
               Pick the district you want framed — you&apos;ll fine-tune the
@@ -501,7 +501,7 @@ export function StudioPicker({
 
             <StepTimeline steps={stepLabels} currentStep={currentStepNum} />
             <h1 className="m-0 mb-3 font-display text-[40px] font-normal leading-[1.03] md:text-[52px]">
-              {selectedCountry}. <span className="italic">Select a building.</span>
+              {selectedCountry}. <span className="text-glow italic">Select a building.</span>
             </h1>
             <p className="m-0 mb-11 max-w-[480px] text-[15px] leading-[1.7] text-cream/[0.62]">
               Choose a landmark building in {selectedCountry} to view and configure in 3D.

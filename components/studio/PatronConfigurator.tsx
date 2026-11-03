@@ -200,7 +200,7 @@ export function PatronConfigurator({
       </AnimatePresence>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-cream/[0.09] bg-deep/70 px-4 backdrop-blur-xl md:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-cream/[0.08] bg-panel/70 px-4 backdrop-blur-xl md:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Link
             href="/studio"
@@ -254,7 +254,7 @@ export function PatronConfigurator({
       </header>
 
       {/* Main workspace */}
-      <div className="relative flex-1 lg:h-[calc(100dvh-64px)] lg:overflow-hidden flex">
+      <div className="studio-stage relative flex-1 lg:h-[calc(100dvh-64px)] lg:overflow-hidden flex">
         {/* Viewport */}
         <div
           className={`studio-viewport relative h-[52vh] lg:absolute lg:inset-0 lg:h-full transition-all duration-300 ease-out ${

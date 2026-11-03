@@ -120,7 +120,7 @@ const SHAPES: [ShapeKind, string, typeof Square][] = [
   ["custom", "Custom", PenTool],
 ];
 
-const ACCENT = "#e5b229";
+const ACCENT = "#ec8a4f";
 
 export const MIN_SIZE = 150;
 export const MAX_SIZE = 2000;
@@ -843,7 +843,7 @@ export function MapPicker({
             type="button"
             onClick={() => setSatellite((s) => !s)}
             title={satellite ? "Switch to street map" : "Switch to satellite"}
-            className="flex h-12 shrink-0 items-center gap-1.5 rounded-2xl border border-white/15 bg-black/70 px-3 font-mono text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xl transition-colors hover:bg-black/85"
+            className="flex h-12 shrink-0 items-center gap-1.5 rounded-2xl border border-cream/10 bg-panel/85 px-3 font-mono text-[10px] font-bold uppercase tracking-wider text-cream shadow-[0_10px_30px_-12px_rgba(20,12,10,0.45)] backdrop-blur-xl transition-colors hover:bg-panel"
           >
             <Layers size={15} />
             <span className="hidden sm:inline">{satellite ? "Map" : "Satellite"}</span>
@@ -852,7 +852,7 @@ export function MapPicker({
             type="button"
             onClick={locateMe}
             title="Move the frame to my location"
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-black/70 text-white backdrop-blur-xl transition-colors hover:bg-black/85"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cream/10 bg-panel/85 text-cream shadow-[0_10px_30px_-12px_rgba(20,12,10,0.45)] backdrop-blur-xl transition-colors hover:bg-panel"
           >
             <LocateFixed size={16} />
           </button>
@@ -861,19 +861,19 @@ export function MapPicker({
 
       {/* The frame is pinned to the ground — say so when it scrolls away. */}
       {!locked && offscreen && !drawing && (
-        <div className="absolute left-1/2 top-[76px] z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-black/80 p-1 pl-3.5 text-white shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl">
-          <span className="mr-1 whitespace-nowrap text-[12px] text-white/75">Frame is out of view</span>
+        <div className="absolute left-1/2 top-[76px] z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-cream/10 bg-panel/90 p-1 pl-3.5 text-cream shadow-[0_10px_30px_-10px_rgba(20,12,10,0.45)] backdrop-blur-xl">
+          <span className="mr-1 whitespace-nowrap text-[12px] text-cream/70">Frame is out of view</span>
           <button
             type="button"
             onClick={() => fitFrame()}
-            className="flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[12px] text-white/85 transition-colors hover:bg-white/10"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[12px] text-cream/85 transition-colors hover:bg-cream/[0.06]"
           >
             <Scan size={13} /> Show it
           </button>
           <button
             type="button"
             onClick={moveHere}
-            className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-black transition-transform hover:scale-[1.03]"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--accent)] px-3 py-1.5 text-[12px] font-medium text-white transition-transform hover:scale-[1.03]"
           >
             <Crosshair size={13} /> Move here
           </button>
@@ -1170,8 +1170,8 @@ function PlaceSearch({ onPick, getBias }: { onPick: (hit: SearchHit) => void; ge
 
   return (
     <div className="relative min-w-0 flex-1">
-      <div className="flex h-12 items-center gap-2 rounded-2xl border border-white/15 bg-black/70 px-3.5 text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl focus-within:border-[var(--accent)]">
-        <Search size={16} className="shrink-0 text-white/60" />
+      <div className="flex h-12 items-center gap-2 rounded-2xl border border-cream/10 bg-panel/85 px-3.5 text-cream shadow-[0_10px_30px_-12px_rgba(20,12,10,0.45)] backdrop-blur-xl focus-within:border-[var(--accent)]">
+        <Search size={16} className="shrink-0 text-cream/55" />
         <input
           value={q}
           onChange={(e) => {
@@ -1194,17 +1194,17 @@ function PlaceSearch({ onPick, getBias }: { onPick: (hit: SearchHit) => void; ge
             }
           }}
           placeholder="Search a place, landmark or lat, lng"
-          className="min-w-0 flex-1 bg-transparent text-[14px] text-white outline-none placeholder:text-white/45"
+          className="min-w-0 flex-1 bg-transparent text-[14px] text-cream outline-none placeholder:text-cream/45"
         />
-        {loading && <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/20 border-t-[var(--accent)]" />}
+        {loading && <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-cream/20 border-t-[var(--accent)]" />}
         {q && !loading && (
-          <button type="button" onClick={() => { setQ(""); setHits([]); }} className="shrink-0 text-white/50 hover:text-white">
+          <button type="button" onClick={() => { setQ(""); setHits([]); }} className="shrink-0 text-cream/50 hover:text-cream">
             <X size={15} />
           </button>
         )}
       </div>
       {open && hits.length > 0 && (
-        <ul className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 m-0 list-none overflow-hidden rounded-2xl border border-white/15 bg-black/85 p-1 text-white shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        <ul className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 m-0 list-none overflow-hidden rounded-2xl border border-cream/10 bg-panel/95 p-1 text-cream shadow-[0_20px_50px_-16px_rgba(20,12,10,0.5)] backdrop-blur-xl">
           {hits.map((h, i) => (
             <li key={h.id}>
               <button
@@ -1212,11 +1212,11 @@ function PlaceSearch({ onPick, getBias }: { onPick: (hit: SearchHit) => void; ge
                 onMouseEnter={() => setActive(i)}
                 onClick={() => pick(h)}
                 className={`flex w-full flex-col items-start rounded-xl px-3 py-2 text-left transition-colors ${
-                  i === active ? "bg-white/10" : ""
+                  i === active ? "bg-[var(--accent)]/10" : ""
                 }`}
               >
                 <span className="text-[13.5px]">{h.title}</span>
-                {h.subtitle && <span className="font-mono text-[10px] text-white/50">{h.subtitle}</span>}
+                {h.subtitle && <span className="font-mono text-[10px] text-cream/50">{h.subtitle}</span>}
               </button>
             </li>
           ))}

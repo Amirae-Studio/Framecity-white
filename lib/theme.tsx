@@ -62,7 +62,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return;
     document.documentElement.setAttribute("data-theme", mode);
     try {
-      localStorage.setItem("fc-theme", mode);
+      localStorage.setItem("fc-studio-theme", mode);
     } catch {
       /* ignore */
     }

@@ -7,14 +7,17 @@ function Bone({ className = "" }: { className?: string }) {
   return <div className={twMerge("animate-pulse rounded-full bg-cream/[0.07]", className)} />;
 }
 
-/** Logo + account bar used by /studio and /studio/models. */
+/** Mirrors StudioHeader, used by /studio and /studio/models. */
 function SiteHeaderSkeleton() {
   return (
-    <header className="flex items-center justify-between border-b border-cream/[0.09] px-6 py-[18px] md:px-[52px]">
-      <Bone className="h-8 w-28 rounded-lg" />
-      <div className="flex items-center gap-5">
-        <Bone className="hidden h-3 w-36 sm:block" />
-        <Bone className="h-8 w-20" />
+    <header>
+      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between px-5 md:px-8">
+        <Bone className="h-9 w-36" />
+        <div className="flex items-center gap-3">
+          <Bone className="hidden h-9 w-48 sm:block" />
+          <Bone className="h-9 w-9" />
+          <Bone className="h-4 w-14" />
+        </div>
       </div>
     </header>
   );
@@ -41,15 +44,17 @@ function AppHeaderSkeleton() {
 
 export function StudioHomeSkeleton() {
   return (
-    <div className="flex min-h-dvh flex-col bg-base">
+    <div className="studio-backdrop flex min-h-dvh flex-col">
       <SiteHeaderSkeleton />
-      <div className="mx-auto w-full max-w-[1000px] px-6 py-14 md:py-20">
-        <Bone className="mb-8 h-12 w-40 rounded-xl md:h-14" />
-        <div className="grid grid-cols-1 gap-[14px] md:grid-cols-[1.6fr_1fr]">
-          <Bone className="min-h-[300px] rounded-2xl" />
-          <div className="flex flex-col gap-[14px]">
-            <Bone className="min-h-[170px] flex-1 rounded-2xl" />
-            <Bone className="h-[66px] rounded-2xl" />
+      <div className="px-3 pt-3 md:px-5">
+        <div className="flex min-h-[580px] animate-pulse flex-col justify-end rounded-[28px] bg-cream/[0.06] p-6 md:h-[min(84dvh,820px)] md:p-12">
+          <Bone className="mb-4 h-3 w-32" />
+          <Bone className="mb-3 h-12 w-[min(560px,100%)] rounded-xl md:h-20" />
+          <Bone className="mb-6 h-12 w-[min(640px,90%)] rounded-xl md:h-20" />
+          <Bone className="mb-8 h-4 w-[min(480px,100%)]" />
+          <div className="flex gap-3">
+            <Bone className="h-12 w-52" />
+            <Bone className="h-12 w-36" />
           </div>
         </div>
       </div>
@@ -59,9 +64,9 @@ export function StudioHomeSkeleton() {
 
 export function StudioModelsSkeleton() {
   return (
-    <div className="flex min-h-dvh flex-col bg-base">
+    <div className="studio-backdrop flex min-h-dvh flex-col">
       <SiteHeaderSkeleton />
-      <div className="mx-auto w-full max-w-[1000px] px-6 py-14 md:py-20">
+      <div className="mx-auto w-full max-w-[1200px] px-6 py-12 md:py-16">
         <Bone className="mb-7 h-3 w-20" />
         <Bone className="mb-8 h-2 w-64" />
         <Bone className="mb-3 h-12 w-72 rounded-xl md:h-14" />

@@ -8,7 +8,7 @@ import { Check, Globe2 } from "lucide-react";
 import { DEFAULT_LAYER_COLORS, FILAMENT_LINES } from "@/lib/studio";
 import type { NavUser } from "@/lib/user";
 import type { ModelFile } from "@/app/studio/actions";
-import { Logo } from "@/components/Logo";
+import { BrandLogo } from "@/components/BrandLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Scrubber from "@/components/ui/Scrubber";
 import { StudioConfigurator } from "@/components/studio/StudioConfigurator";
@@ -207,7 +207,7 @@ export function ExploreWorld({ user, hasAccess }: { user: NavUser | null; hasAcc
 
   return (
     <div className="flex h-dvh flex-col bg-base text-cream">
-      <header className="z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-cream/[0.09] bg-deep/70 px-4 backdrop-blur-xl md:px-6">
+      <header className="z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-cream/[0.08] bg-panel/70 px-4 backdrop-blur-xl md:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Link
             href="/studio"
@@ -228,8 +228,8 @@ export function ExploreWorld({ user, hasAccess }: { user: NavUser | null; hasAcc
         <div className="flex shrink-0 items-center gap-3">
           <StepPills phase={phase} />
           <ThemeToggle />
-          <Link href="/" className="hidden md:inline-flex">
-            <Logo className="theme-logo h-7" />
+          <Link href="/studio" className="hidden no-underline md:inline-flex">
+            <BrandLogo />
           </Link>
         </div>
       </header>
@@ -267,7 +267,7 @@ export function ExploreWorld({ user, hasAccess }: { user: NavUser | null; hasAcc
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 flex items-center justify-center bg-black/45 backdrop-blur-[2px]"
+              className="absolute inset-0 z-20 flex items-center justify-center bg-[#120d0c]/40 backdrop-blur-[3px]"
             >
               <div className="flex w-[300px] flex-col items-center gap-4 rounded-2xl border border-cream/[0.14] bg-panel/95 p-6 text-center shadow-2xl">
                 <div className="relative h-12 w-12">

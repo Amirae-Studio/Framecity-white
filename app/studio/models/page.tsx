@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Logo } from "@/components/Logo";
-import { SignOutButton } from "@/components/SignOutButton";
+import { StudioHeader } from "@/components/studio/StudioHeader";
 import { StudioPicker } from "@/components/studio/StudioPicker";
 
 import { fetchStudioCities, fetchStudioBuildings, checkPatronAccess, getPatronSubfolders } from "@/app/studio/actions";
@@ -34,18 +32,8 @@ export default async function StudioModelsPage({
   const { view } = await searchParams;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-base">
-      <header className="flex items-center justify-between border-b border-cream/[0.09] px-6 py-[18px] md:px-[52px]">
-        <Link href="/" className="inline-flex">
-          <Logo className="theme-logo h-8" priority />
-        </Link>
-        <div className="flex items-center gap-5">
-          <span className="hidden font-mono text-[11px] text-cream/40 sm:inline">
-            {email}
-          </span>
-          <SignOutButton />
-        </div>
-      </header>
+    <div className="studio-backdrop flex min-h-dvh flex-col text-cream">
+      <StudioHeader email={email} />
 
       <main className="flex flex-1 flex-col">
         <StudioPicker

@@ -33,7 +33,7 @@ export function SpotlightCard({
       onMouseLeave={() => setOpacity(0)}
       whileHover={!disabled ? { y: -4, scale: 1.01 } : undefined}
       transition={{ duration: 0.3 }}
-      className={`group relative overflow-hidden rounded-2xl border border-cream/[0.14] bg-panel text-left ${className}`}
+      className={`glass group relative overflow-hidden rounded-2xl text-left ${className}`}
     >
       {/* glow layer */}
       <div

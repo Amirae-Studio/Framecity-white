@@ -110,6 +110,100 @@ body {
   --logo-filter: none;
 }
 
+/* Dusk palette for every /studio route, taken from a skyline at last light.
+   Light mode is the haze — mauve-grey sky, slate horizon, copper glints.
+   Dark mode is nightfall — charcoal streets with amber windows. */
+.theme-dusk {
+  --color-base: #ece6e1;
+  --color-panel: #f7f3ef;
+  --color-panel-2: #e2dad3;
+  --color-deep: #ddd4cc;
+  --color-marquee: #e2dad3;
+  --color-cream: #1d181b;
+  --ink-rgb: 29, 24, 27;
+  --accent: #c4622f;
+  --accent-rgb: 196, 98, 47;
+  --accent-text: #a94f20;
+  --haze: #cfc8c9;
+  --horizon: #8f9aab;
+  --glow: rgba(196, 98, 47, 0.16);
+  --hero-filter: saturate(1.02);
+  --hero-veil: rgba(236, 230, 225, 0.92);
+  --grad-warm-a: #e2dad3;
+  --grad-warm-b: #ece6e1;
+  --map-a: #ddd4cc;
+  --map-b: #d3c9c0;
+  --stripe-a: #e2dad3;
+  --stripe-b: #d8cfc7;
+  --logo-filter: invert(1) brightness(0.6) contrast(1.1);
+  color-scheme: light;
+  color: var(--color-cream);
+}
+
+:root[data-theme="dark"] .theme-dusk {
+  --color-base: #0e0c0e;
+  --color-panel: #171316;
+  --color-panel-2: #201a1d;
+  --color-deep: #090708;
+  --color-marquee: #171316;
+  --color-cream: #f2e8e0;
+  --ink-rgb: 242, 232, 224;
+  --accent: #ec8a4f;
+  --accent-rgb: 236, 138, 79;
+  --accent-text: #f19a64;
+  --haze: #1d1a21;
+  --horizon: #2f3646;
+  --glow: rgba(236, 138, 79, 0.2);
+  --hero-filter: brightness(0.62) saturate(1.15) contrast(1.05);
+  --hero-veil: rgba(14, 12, 14, 0.95);
+  --grad-warm-a: #201a1d;
+  --grad-warm-b: #0e0c0e;
+  --map-a: #201a1d;
+  --map-b: #171316;
+  --stripe-a: #201a1d;
+  --stripe-b: #171316;
+  --logo-filter: none;
+  color-scheme: dark;
+}
+
+body:has(.theme-dusk) {
+  background: var(--color-base);
+}
+
+/* Page backdrop: haze at the top settling into the base, a copper glow low down */
+.studio-backdrop {
+  background:
+    radial-gradient(60% 45% at 90% 100%, var(--glow), transparent 70%),
+    radial-gradient(70% 40% at 0% 0%, color-mix(in srgb, var(--horizon) 22%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--haze) 0%, var(--color-base) 42%);
+  background-attachment: fixed;
+}
+
+/* Behind the 3D viewer — the model sits on a horizon at dusk */
+.studio-stage {
+  background:
+    radial-gradient(55% 45% at 50% 100%, var(--glow), transparent 70%),
+    linear-gradient(180deg, var(--haze) 0%, color-mix(in srgb, var(--horizon) 25%, var(--color-base)) 55%, var(--color-base) 100%);
+}
+
+/* Copper light catching a glass facade — for accent words */
+.text-glow {
+  background: linear-gradient(100deg, var(--accent-text) 0%, var(--accent) 45%, #e8b07a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.08em; /* keep the italic overhang inside the clip */
+}
+
+/* Frosted panel */
+.glass {
+  background: color-mix(in srgb, var(--color-panel) 78%, transparent);
+  border: 1px solid rgba(var(--ink-rgb), 0.08);
+  box-shadow: 0 18px 40px -26px rgba(20, 12, 10, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
 /* Hero legibility scrim — fades the page background into the photo, per theme */
 .hero-scrim {
   background: linear-gradient(
